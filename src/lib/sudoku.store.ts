@@ -1,0 +1,41 @@
+import { get, writable } from 'svelte/store';
+import { Sudoku } from './brain';
+
+const initialSudoku = new Sudoku();
+export const sudoku = writable<Sudoku>(initialSudoku);
+
+export function setValue(row: number, col: number, value: number) {
+  const instance = get(sudoku);
+  instance.setCellValue(row, col, value);
+  sudoku.update(() => instance);
+}
+
+export function setValueForActiveCells(value: number) {
+  const instance = get(sudoku);
+  instance.setValueForActiveCells(value);
+  sudoku.update(() => instance);
+}
+
+export function changeMode(mode: number) {
+  const instance = get(sudoku);
+  instance.mode = mode;
+  sudoku.update(() => instance);
+}
+
+export function computeCandidates() {
+  const instance = get(sudoku);
+  instance.computeCandidates();
+  sudoku.update(() => instance);
+}
+
+export function setActiveCell(row: number, col: number, multi = false) {
+  const instance = get(sudoku);
+  instance.setActiveCell(row, col, multi);
+  sudoku.update(() => instance);
+}
+
+export function moveActiveCell(direction: "up" | "down" | "left" | "right") {
+  const instance = get(sudoku);
+  instance.moveActiveCell(direction);
+  sudoku.update(() => instance);
+}
