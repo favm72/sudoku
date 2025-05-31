@@ -39,6 +39,7 @@ export class Candidate {
 export enum SudokuMode {
   Customize,
   Solve,
+  Solved,
   Annotate,
 }
 
@@ -93,14 +94,13 @@ export class Sudoku {
   }
 
   public setCellValue(row: number, col: number, value: number, computeCandidates: boolean = true) {
-    const isValid = this.checkCellValue(row, col, value);
-    if (!isValid) return;
+    if (value > 0) {
+      const isValid = this.checkCellValue(row, col, value);
+      if (!isValid) return;
+    }
     const cell = this.cells.get(cellKey(row, col));
     if (!cell) return;
     cell.value = value;
-    if (this.mode === SudokuMode.Customize) {
-      cell.isGiven = true
-    }
     if (computeCandidates) this.computeCandidates();
   }
 
@@ -115,6 +115,25 @@ export class Sudoku {
     if (cell) {
       cell.active = true;
     }
+  }
+
+  public endSolving() {
+    if (this.cells.values().some(cell => cell.value === 0)) {
+      alert("Por favor, complete todos los campos antes de finalizar.");
+      return;
+    }
+    alert("Sudoku completado correctamente.");
+    this.mode = SudokuMode.Solved;
+  }
+
+  public newCustomSudoku() {
+    for (let i = 1; i <= 9; i++) {
+      for (let j = 1; j <= 9; j++) {
+        const cell = new Cell(i, j);
+        this.cells.set(cellKey(i, j), cell);
+      }
+    }
+    this.mode = SudokuMode.Customize;
   }
 
   public moveActiveCell(direction: "up" | "down" | "left" | "right") {

@@ -1,8 +1,13 @@
 <script lang="ts">
   import { onDestroy } from "svelte"
-  import { writable } from "svelte/store"
+  import { derived, writable } from "svelte/store"
   import { cellKey } from "./brain"
-  import { startSolving, sudoku } from "./sudoku.store"
+  import {
+    endSolving,
+    newCustomSudoku,
+    startSolving,
+    sudoku,
+  } from "./sudoku.store"
   import SudokuCell from "./SudokuCell.svelte"
 
   const rowsIndex = Array.from({ length: 9 }, (_, i) => i + 1)
@@ -13,6 +18,13 @@
   const time = writable(0)
   let running = false
   let finished = false
+
+  // Digital clock font formatting mm:ss
+  const digitalTime = derived(time, $time => {
+    const mm = String(Math.floor($time / 60)).padStart(2, "0")
+    const ss = String($time % 60).padStart(2, "0")
+    return `${mm}:${ss}`
+  })
 
   function startGame() {
     startSolving()
@@ -30,6 +42,7 @@
     finished = true
     if (timer) clearInterval(timer)
     timer = null
+    endSolving()
   }
 
   onDestroy(() => {
@@ -53,7 +66,7 @@
     <div class="sudoku-header">
       <h1 class="sudoku-title">Milena</h1>
     </div>
-    <span class="timer">
+    <span class="timer digital-font">
       <svg class="clock-icon" viewBox="0 0 24 24" width="24" height="24"
         ><circle
           cx="12"
@@ -80,8 +93,11 @@
           stroke-linecap="round"
         /></svg
       >
-      {$time} s
+      {$digitalTime}
     </span>
+    <button class="start-btn" on:click={newCustomSudoku} disabled={running}
+      >Nuevo Custom</button
+    >
     <button class="start-btn" on:click={startGame} disabled={running}
       >Comenzar</button
     >
@@ -95,6 +111,7 @@
 </section>
 
 <style lang="scss">
+  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
   .sudoku-header {
     display: flex;
     justify-content: center;
@@ -122,12 +139,16 @@
     display: flex;
     align-items: center;
     font-weight: bold;
-    font-size: 1.3rem;
+    font-size: 1.6rem;
     color: #1976d2;
     background: #f5faff;
     border-radius: 1.5rem;
     padding: 0.3rem 1.1rem 0.3rem 0.7rem;
     box-shadow: 0 1px 4px #1976d220;
+  }
+  .sudoku-controls .digital-font {
+    font-family: "Share Tech Mono", "Courier New", Courier, monospace;
+    letter-spacing: 0.08em;
   }
   .sudoku-controls .clock-icon {
     margin-right: 0.5rem;

@@ -25,6 +25,8 @@
       if (e.key === "ArrowDown") moveActiveCell("down")
       if (e.key === "ArrowLeft") moveActiveCell("left")
       if (e.key === "ArrowRight") moveActiveCell("right")
+    } else if (e.key === "Backspace" || e.key === "Delete") {
+      setValueForActiveCells(0)
     }
   }
 </script>
@@ -60,37 +62,55 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--cell-bg, white);
-    color: var(--cell-text, black);
-    font-size: 1.5rem;
+    background-color: #fff;
+    color: #222;
+    font-size: 2rem;
     box-sizing: border-box;
     aspect-ratio: 1;
     width: 100%;
     height: auto;
+    border: 1.5px solid #b0b0b0;
+    transition:
+      background 0.15s,
+      color 0.15s,
+      outline 0.15s;
+    cursor: pointer;
+    position: relative;
     &.candidates {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      padding: 0.2rem;
+      padding: 0.1rem;
+      background: #f7f7f7;
+      font-size: 1rem;
       > div {
         text-align: center;
-        font-size: 0.7rem;
+        font-size: 0.85rem;
+        color: #1976d2;
         width: 100%;
         height: auto;
         aspect-ratio: 1;
+        opacity: 0.85;
+        font-weight: 500;
       }
     }
     &.active {
-      outline: 2px solid #1976d2;
-      z-index: 1;
+      outline: 2.5px solid #1976d2;
+      z-index: 2;
+      background: #e3f0fc;
     }
     &.given {
       color: #1976d2;
-      font-weight: bold;
+      font-weight: 700;
+      background: #f7faff;
     }
     &.user {
-      color: #111;
-      font-weight: bold;
+      color: #222;
+      font-weight: 700;
+      background: #fff;
+    }
+    &:hover {
+      background: #eaf4fd;
     }
   }
 </style>

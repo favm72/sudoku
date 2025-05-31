@@ -45,3 +45,15 @@ export function startSolving() {
   instance.StartSolving();
   sudoku.update(() => instance);
 }
+
+export function endSolving() {
+  const instance = get(sudoku);
+  instance.endSolving();
+  sudoku.update(() => instance);
+}
+
+export function newCustomSudoku() {
+  const instance = get(sudoku);
+  instance.newCustomSudoku();
+  sudoku.update(() => instance);
+}
