@@ -135,15 +135,4 @@
       background: #eaf4fd;
     }
   }
-
-  .sudoku-board {
-    width: 630px;
-    height: 630px;
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
-    gap: 0;
-    border: 2.5px solid #1976d2;
-    background: #222;
-  }
 </style>
