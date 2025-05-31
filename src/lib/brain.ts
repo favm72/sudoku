@@ -59,6 +59,17 @@ export class Sudoku {
     this.mode = mode;
   }
 
+  public StartSolving() {
+    this.cells.values().filter(cell => cell.value > 0).forEach(
+      cell => {
+        cell.disabled = true;
+        cell.isGiven = true;
+      }
+    );
+    this.computeCandidates();
+    this.changeMode(SudokuMode.Solve);
+  }
+
   public checkCellValue(row: number, col: number, value: number) {
     for (let i = 1; i <= 9; i++) {
       if (this.cells.get(cellKey(row, i))!.value === value && i !== col) {

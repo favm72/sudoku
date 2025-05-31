@@ -39,3 +39,9 @@ export function moveActiveCell(direction: "up" | "down" | "left" | "right") {
   instance.moveActiveCell(direction);
   sudoku.update(() => instance);
 }
+
+export function startSolving() {
+  const instance = get(sudoku);
+  instance.StartSolving();
+  sudoku.update(() => instance);
+}

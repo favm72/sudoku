@@ -29,9 +29,9 @@
   }
 </script>
 
-{#if cell.isGiven}
+{#if cell.value > 0}
   <div
-    class="cell"
+    class="cell {cell.isGiven ? 'given' : 'user'}"
     class:active={cell.active}
     on:click={handleClick}
     tabindex="0"
@@ -83,6 +83,14 @@
     &.active {
       outline: 2px solid #1976d2;
       z-index: 1;
+    }
+    &.given {
+      color: #1976d2;
+      font-weight: bold;
+    }
+    &.user {
+      color: #111;
+      font-weight: bold;
     }
   }
 </style>
