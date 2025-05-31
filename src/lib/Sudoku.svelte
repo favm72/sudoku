@@ -6,6 +6,7 @@
     endSolving,
     loadSudoku,
     newCustomSudoku,
+    setValueForActiveCells,
     startSolving,
     sudoku,
   } from "./sudoku.store"
@@ -55,6 +56,14 @@
   })
 
   let showCandidates = true
+
+  function handleNumberInput(num: number) {
+    // Llama a la función para poner el valor en las celdas activas
+    setValueForActiveCells(num)
+  }
+  function handleDeleteInput() {
+    setValueForActiveCells(0)
+  }
 </script>
 
 <section class="sudoku-container">
@@ -126,6 +135,34 @@
     {#if finished}
       <span class="finished">Juego finalizado</span>
     {/if}
+  </section>
+  <section class="sudoku-numpad">
+    <div class="numpad-row">
+      {#each [1, 2, 3] as n}
+        <button class="numpad-btn" on:click={() => handleNumberInput(n)}
+          >{n}</button
+        >
+      {/each}
+    </div>
+    <div class="numpad-row">
+      {#each [4, 5, 6] as n}
+        <button class="numpad-btn" on:click={() => handleNumberInput(n)}
+          >{n}</button
+        >
+      {/each}
+    </div>
+    <div class="numpad-row">
+      {#each [7, 8, 9] as n}
+        <button class="numpad-btn" on:click={() => handleNumberInput(n)}
+          >{n}</button
+        >
+      {/each}
+    </div>
+    <div class="numpad-row">
+      <button class="numpad-btn delete" on:click={handleDeleteInput}
+        >Borrar</button
+      >
+    </div>
   </section>
 </section>
 
@@ -238,5 +275,43 @@
     gap: 1px;
     border: 1px solid black;
     background: #222;
+  }
+  .sudoku-numpad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 0.3rem;
+  }
+  .numpad-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .numpad-btn {
+    font-family: "Montserrat", Arial, sans-serif;
+    font-size: 2rem;
+    width: 64px;
+    height: 64px;
+    border-radius: 1.2rem;
+    border: none;
+    background: #f5faff;
+    color: #1976d2;
+    font-weight: 700;
+    box-shadow: 0 1px 4px #1976d220;
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      color 0.15s;
+  }
+  .numpad-btn:active {
+    background: #e3f0fc;
+  }
+  .numpad-btn.delete {
+    background: linear-gradient(90deg, #d32f2f 60%, #f44336 100%);
+    color: #fff;
+    font-size: 1.3rem;
+    width: 140px;
+    height: 48px;
+    margin-top: 0.2rem;
   }
 </style>
