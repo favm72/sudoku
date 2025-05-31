@@ -55,7 +55,7 @@
     if (timer) clearInterval(timer)
   })
 
-  let showCandidates = true
+  let showCandidates = false
 
   function handleNumberInput(num: number) {
     // Llama a la función para poner el valor en las celdas activas
@@ -67,24 +67,8 @@
 </script>
 
 <section class="sudoku-container">
-  <section class="sudoku-board">
-    {#each rowsIndex as row}
-      {#each colsIndex as col}
-        {#if $sudoku.cells.has(cellKey(row, col))}
-          <SudokuCell
-            cell={$sudoku.cells.get(cellKey(row, col))!}
-            {showCandidates}
-          />
-        {:else}
-          <div class="cell">Empty</div>
-        {/if}
-      {/each}
-    {/each}
-  </section>
-  <section class="sudoku-controls">
-    <div class="sudoku-header">
-      <h1 class="sudoku-title">Milena</h1>
-    </div>
+  <div class="sudoku-header">
+    <h1 class="sudoku-title">Milena</h1>
     <span class="timer digital-font">
       <svg class="clock-icon" viewBox="0 0 24 24" width="24" height="24"
         ><circle
@@ -114,6 +98,8 @@
       >
       {$digitalTime}
     </span>
+  </div>
+  <section class="sudoku-controls">
     <button class="start-btn" on:click={newCustomSudoku} disabled={running}
       >Nuevo Custom</button
     >
@@ -136,6 +122,21 @@
       <span class="finished">Juego finalizado</span>
     {/if}
   </section>
+  <section class="sudoku-board">
+    {#each rowsIndex as row}
+      {#each colsIndex as col}
+        {#if $sudoku.cells.has(cellKey(row, col))}
+          <SudokuCell
+            cell={$sudoku.cells.get(cellKey(row, col))!}
+            {showCandidates}
+          />
+        {:else}
+          <div class="cell">Empty</div>
+        {/if}
+      {/each}
+    {/each}
+  </section>
+
   <section class="sudoku-numpad">
     <div class="numpad-row">
       {#each [1, 2, 3] as n}
@@ -173,7 +174,7 @@
     justify-content: center;
     align-items: flex-start;
     gap: 2rem;
-    margin-bottom: 2rem;
+    padding: 1rem;
   }
   .sudoku-title {
     font-family: "Montserrat", Arial, sans-serif;
@@ -185,13 +186,14 @@
     text-shadow: 1px 1px 2px #eee;
   }
   .sudoku-controls {
+    padding: 1rem;
     display: flex;
-    flex-direction: column;
     align-items: flex-end;
-    gap: 1.2rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     min-width: 180px;
   }
-  .sudoku-controls .timer {
+  .timer {
     display: flex;
     align-items: center;
     font-weight: bold;
@@ -202,11 +204,11 @@
     padding: 0.3rem 1.1rem 0.3rem 0.7rem;
     box-shadow: 0 1px 4px #1976d220;
   }
-  .sudoku-controls .digital-font {
+  .digital-font {
     font-family: "Share Tech Mono", "Courier New", Courier, monospace;
     letter-spacing: 0.08em;
   }
-  .sudoku-controls .clock-icon {
+  .clock-icon {
     margin-right: 0.5rem;
     vertical-align: middle;
   }
@@ -264,9 +266,10 @@
   }
   .sudoku-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    min-height: 70vh;
+    justify-content: center;
+    width: 100%;
   }
   .sudoku-board {
     display: grid;
