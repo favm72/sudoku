@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onDestroy } from "svelte"
   import { derived, writable } from "svelte/store"
-  import { cellKey } from "./brain"
+  import { cellKey, sudokus } from "./brain"
   import {
     endSolving,
+    loadSudoku,
     newCustomSudoku,
     startSolving,
     sudoku,
@@ -45,9 +46,15 @@
     endSolving()
   }
 
+  function newExpertSudoku() {
+    loadSudoku(sudokus[0])
+  }
+
   onDestroy(() => {
     if (timer) clearInterval(timer)
   })
+
+  let showCandidates = true
 </script>
 
 <section class="sudoku-container">
@@ -55,7 +62,10 @@
     {#each rowsIndex as row}
       {#each colsIndex as col}
         {#if $sudoku.cells.has(cellKey(row, col))}
-          <SudokuCell cell={$sudoku.cells.get(cellKey(row, col))!} />
+          <SudokuCell
+            cell={$sudoku.cells.get(cellKey(row, col))!}
+            {showCandidates}
+          />
         {:else}
           <div class="cell">Empty</div>
         {/if}
@@ -98,6 +108,15 @@
     <button class="start-btn" on:click={newCustomSudoku} disabled={running}
       >Nuevo Custom</button
     >
+    <button class="start-btn" on:click={newExpertSudoku} disabled={running}
+      >Nuevo Experto</button
+    >
+    <button
+      class="candidates-btn"
+      on:click={() => (showCandidates = !showCandidates)}
+    >
+      {showCandidates ? "Ocultar candidatos" : "Mostrar candidatos"}
+    </button>
     <button class="start-btn" on:click={startGame} disabled={running}
       >Comenzar</button
     >
@@ -187,6 +206,24 @@
     margin-top: 0.5rem;
     font-size: 1.1rem;
     letter-spacing: 0.04em;
+  }
+  .sudoku-controls .candidates-btn {
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 1.2rem;
+    background: linear-gradient(90deg, #43a047 60%, #81c784 100%);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      box-shadow 0.2s;
+    box-shadow: 0 2px 8px #1976d220;
+    margin-bottom: 0.2rem;
+  }
+  .sudoku-controls .candidates-btn:active {
+    background: #388e3c;
   }
   .sudoku-container {
     display: flex;

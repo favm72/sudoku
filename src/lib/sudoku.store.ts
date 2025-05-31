@@ -57,3 +57,9 @@ export function newCustomSudoku() {
   instance.newCustomSudoku();
   sudoku.update(() => instance);
 }
+
+export function loadSudoku(line: string) {
+  const instance = get(sudoku);
+  instance.loadSudoku(line);
+  sudoku.update(() => instance);
+}

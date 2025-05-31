@@ -29,6 +29,9 @@ export class Cell {
   }
 }
 
+export const sudokus = [
+  "000085704580240900604000005758916000010000000060000190045103009100750600000020001"
+]
 export class Candidate {
   public bgColor: string = "white";
   public textColor: string = "black";
@@ -115,6 +118,22 @@ export class Sudoku {
     if (cell) {
       cell.active = true;
     }
+  }
+
+  public loadSudoku(line: string) {
+    this.changeMode(SudokuMode.Customize);
+    const values = line.split("").map(Number);
+    if (values.length !== 81) {
+      alert("Formato de Sudoku inválido. Debe contener 81 valores.");
+      return;
+    }
+    for (let i = 0; i < 81; i++) {
+      const row = Math.floor(i / 9) + 1;
+      const col = (i % 9) + 1;
+      this.setCellValue(row, col, values[i]);
+    }
+    this.computeCandidates();
+    this.StartSolving();
   }
 
   public endSolving() {
