@@ -16,11 +16,23 @@
   let cellSize = 60 // px
   let boardPx = cellSize * size
 
+  function getThemeColor(varName: string) {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim()
+  }
+
   function drawBoard() {
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
     ctx.clearRect(0, 0, boardPx, boardPx)
+    // Get theme colors
+    const themeMain = getThemeColor("--theme-main")
+    const themeAccent = getThemeColor("--theme-accent")
+    const themeLight = getThemeColor("--theme-light")
+    const themeBg = getThemeColor("--theme-bg")
+    const themeContrast = getThemeColor("--theme-contrast")
     // Use Montserrat font for all text
     ctx.font = `bold ${cellSize * 0.6}px Montserrat, Arial`
     ctx.textAlign = "center"
@@ -29,7 +41,7 @@
     // Draw grid
     for (let i = 0; i <= size; i++) {
       ctx.lineWidth = i % 3 === 0 ? 3 : 1
-      ctx.strokeStyle = i % 3 === 0 ? "#1976d2" : "#b0b0b0"
+      ctx.strokeStyle = i % 3 === 0 ? themeMain : "#b0b0b0"
       // Vertical
       ctx.beginPath()
       ctx.moveTo(i * cellSize, 0)
@@ -51,7 +63,7 @@
         // Fill background if highlighted
         if (cell.highLighted || cell.errorValue) {
           ctx.save()
-          ctx.fillStyle = cell.errorValue ? "#ffcccc" : "#a3cff0"
+          ctx.fillStyle = cell.errorValue ? "#ffcccc" : themeLight
           ctx.fillRect(
             (col - 1) * cellSize + 2,
             (row - 1) * cellSize + 2,
@@ -63,7 +75,7 @@
         if (cell.value > 0 || cell.errorValue) {
           ctx.font = `bold ${cellSize * 0.6}px Montserrat, Arial`
           ctx.fillStyle = cell.isGiven
-            ? "#1976d2"
+            ? themeMain
             : cell.errorValue
               ? "#d32f2f"
               : "#333"
@@ -80,7 +92,7 @@
           // Candidates (draw small)
           ctx.save()
           ctx.font = `${cellSize * 0.28}px Montserrat, Arial`
-          ctx.fillStyle = "#1976d2"
+          ctx.fillStyle = themeMain
           for (let n = 1; n <= 9; n++) {
             const cand = cell.candidates.get(n)
             if (cand && !cand.isHidden) {
@@ -94,7 +106,7 @@
         // Highlight active
         if (cell.active) {
           ctx.save()
-          ctx.strokeStyle = "#1976d2"
+          ctx.strokeStyle = themeMain
           ctx.lineWidth = 3
           ctx.strokeRect(
             (col - 1) * cellSize + 2,
@@ -145,7 +157,27 @@
 
     // Initial draw
     drawBoard()
-    return unsubscribe
+
+    // Observe theme changes
+    const observer = new MutationObserver(mutations => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "data-theme"
+        ) {
+          drawBoard()
+        }
+      }
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    })
+
+    return () => {
+      unsubscribe()
+      observer.disconnect()
+    }
   })
 </script>
 

@@ -36,19 +36,11 @@
 
 <span class="timer digital-font">
   <svg class="clock-icon" viewBox="0 0 24 24" width="24" height="24"
-    ><circle
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="#1976d2"
-      stroke-width="2"
-      fill="none"
-    /><line
+    ><circle cx="12" cy="12" r="10" stroke-width="2" fill="none" /><line
       x1="12"
       y1="12"
       x2="12"
       y2="7"
-      stroke="#1976d2"
       stroke-width="2"
       stroke-linecap="round"
     /><line
@@ -56,7 +48,6 @@
       y1="12"
       x2="16"
       y2="12"
-      stroke="#1976d2"
       stroke-width="2"
       stroke-linecap="round"
     /></svg
@@ -70,11 +61,11 @@
     align-items: center;
     font-weight: bold;
     font-size: 1.6rem;
-    color: #1976d2;
-    background: #f5faff;
+    color: var(--theme-main);
+    background: var(--theme-bg);
     border-radius: 1.5rem;
     padding: 0.3rem 1.1rem 0.3rem 0.7rem;
-    box-shadow: 0 1px 4px #1976d220;
+    box-shadow: 0 1px 4px var(--theme-main) 20;
   }
   .digital-font {
     font-family: "Share Tech Mono", "Courier New", Courier, monospace;
@@ -83,5 +74,7 @@
   .clock-icon {
     margin-right: 0.5rem;
     vertical-align: middle;
+    fill: var(--theme-main);
+    stroke: var(--theme-main);
   }
 </style>

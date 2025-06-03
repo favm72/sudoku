@@ -27,11 +27,9 @@
         stroke-linejoin="round"
       ></g><g id="SVGRepo_iconCarrier">
         <path
-          d="M4 7H15C16.8692 7 17.8039 7 18.5 7.40193C18.9561 7.66523 19.3348 8.04394 19.5981 8.49999C20 9.19615 20 10.1308 20 12C20 13.8692 20 14.8038 19.5981 15.5C19.3348 15.9561 18.9561 16.3348 18.5 16.5981C17.8039 17 16.8692 17 15 17H8.00001M4 7L7 4M4 7L7 10"
-          stroke="#1C274C"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M7.53033 3.46967C7.82322 3.76256 7.82322 4.23744 7.53033 4.53033L5.81066 6.25H15C18.1756 6.25 20.75 8.82436 20.75 12C20.75 15.1756 18.1756 17.75 15 17.75H8.00001C7.58579 17.75 7.25001 17.4142 7.25001 17C7.25001 16.5858 7.58579 16.25 8.00001 16.25H15C17.3472 16.25 19.25 14.3472 19.25 12C19.25 9.65279 17.3472 7.75 15 7.75H5.81066L7.53033 9.46967C7.82322 9.76256 7.82322 10.2374 7.53033 10.5303C7.23744 10.8232 6.76256 10.8232 6.46967 10.5303L3.46967 7.53033C3.17678 7.23744 3.17678 6.76256 3.46967 6.46967L6.46967 3.46967C6.76256 3.17678 7.23744 3.17678 7.53033 3.46967Z"
         ></path>
       </g></svg
     >
@@ -51,13 +49,13 @@
         <defs>
           <style>
             .cls-1 {
-              fill: #aecbfa;
+              fill: var(--theme-main);
             }
             .cls-2 {
-              fill: #669df6;
+              fill: var(--theme-accent);
             }
             .cls-3 {
-              fill: #4285f4;
+              fill: var(--theme-bg);
             }
           </style>
         </defs> <title>Icon_24px_ComputeEngine_Color</title>
@@ -125,7 +123,9 @@
   </button>
 
   <button
-    class="numpad-btn annotate"
+    class="numpad-btn {$sudoku.mode === SudokuMode.Annotate
+      ? ' annotate'
+      : ' annotate-mode'}"
     onclick={toggleAnnotation}
     aria-label="Modo anotación"
   >
@@ -134,8 +134,6 @@
       height="32"
       viewBox="0 0 512 512"
       style="display:block;max-width:100%;max-height:100%;"
-      fill="#{$sudoku.mode === SudokuMode.Annotate ? '1976d2' : 'bdbdbd'}"
-      stroke="#{$sudoku.mode === SudokuMode.Annotate ? '1976d2' : 'bdbdbd'}"
     >
       <g>
         <path
@@ -184,6 +182,8 @@
       display: block;
       margin: 0 auto;
       pointer-events: none;
+      fill: var(--theme-main);
+      stroke: var(--theme-main);
     }
 
     &:active {
@@ -198,20 +198,12 @@
       height: 64px;
       justify-content: center;
       align-items: center;
-
-      svg {
-        display: block;
-      }
     }
     &.compute {
       background: white;
       color: var(--theme-main);
       width: 64px;
       height: 64px;
-
-      svg {
-        display: block;
-      }
     }
     &.annotate {
       background: white;
@@ -221,6 +213,11 @@
     }
     &.annotate-mode {
       font-size: 1.2rem;
+
+      svg {
+        fill: var(--theme-light);
+        stroke: var(--theme-light);
+      }
     }
   }
 </style>
