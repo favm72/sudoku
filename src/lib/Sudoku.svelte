@@ -132,20 +132,26 @@
     setActiveCell(row, col)
   }
 
+  let gifTimer: number | null = null
+  let renderGifMoving = $state(0)
+
   onMount(() => {
     const unsubscribe = sudoku.subscribe(() => {
       drawBoard()
 
       if (get(sudoku).status === SudokuStatus.Completed) {
-        alert("¡Sudoku completado!")
         running = false
-        startedAt = new Date()
+        gifTimer = setInterval(() => {
+          renderGifMoving++
+        }, 2000)
       }
 
       if (get(sudoku).status === SudokuStatus.Failed) {
-        alert("¡Sudoku fallido! Intenta de nuevo.")
-        running = false
-        startedAt = null
+        running = true
+        startedAt = new Date()
+        if (id) {
+          loadSudoku(id)
+        }
       }
     })
 
@@ -177,6 +183,9 @@
     return () => {
       unsubscribe()
       observer.disconnect()
+      if (gifTimer) {
+        clearInterval(gifTimer)
+      }
     }
   })
 </script>
@@ -186,6 +195,17 @@
     <h1 class="sudoku-title">Milena</h1>
     <SudokuTimer {running} startTime={startedAt} />
   </div>
+  -
+  {#if $sudoku.status === SudokuStatus.Completed}
+    <div class="success-message">
+      <p>¡Felicidades! Sudoku completado.</p>
+      <img
+        src="https://www.icegif.com/wp-content/uploads/2022/06/icegif-247.gif?tick={renderGifMoving}"
+        alt="Sudoku completado"
+        width="200"
+      />
+    </div>
+  {/if}
   <section class="sudoku-board">
     <canvas
       bind:this={canvas}
@@ -238,5 +258,56 @@
     height: auto;
     display: block;
     margin: 0 auto;
+  }
+  .success-message {
+    background: linear-gradient(
+      90deg,
+      var(--theme-green-light) 60%,
+      var(--theme-green-bg) 100%
+    );
+    color: var(--theme-green-main);
+    border: 2px solid var(--theme-green-main);
+    border-radius: 1.2rem;
+    padding: 1.2rem 2rem;
+    margin: 1.5rem auto 1rem auto;
+    font-size: 1.3rem;
+    font-family: "Montserrat", Arial, sans-serif;
+    font-weight: 600;
+    box-shadow: 0 2px 12px #388e3c22;
+    text-align: center;
+    max-width: 420px;
+    animation: pop-in 0.5s;
+  }
+  @keyframes shake {
+    10%,
+    90% {
+      transform: translateX(-2px);
+    }
+    20%,
+    80% {
+      transform: translateX(4px);
+    }
+    30%,
+    50%,
+    70% {
+      transform: translateX(-8px);
+    }
+    40%,
+    60% {
+      transform: translateX(8px);
+    }
+  }
+  @keyframes pop-in {
+    0% {
+      transform: scale(0.7);
+      opacity: 0;
+    }
+    80% {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 </style>

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte"
   import { push } from "svelte-spa-router"
   import { sudokuDataset } from "../lib/dataset"
+  import { clearSudoku } from "../lib/sudoku.store"
   import ThemeSelector from "../lib/ThemeSelector.svelte"
   const difficulties = [
     { label: "Fácil", id: "Very Easy" },
@@ -24,11 +26,15 @@
     const board = randomBoard(difficulty)
     await push(`/board/${board.id}`)
   }
+
+  onMount(() => {
+    clearSudoku()
+  })
 </script>
 
-<ThemeSelector />
 <main class="home-container">
   <h1>Sudoku</h1>
+  <ThemeSelector />
   <p>Elige una dificultad para comenzar:</p>
   <div class="difficulty-buttons">
     {#each difficulties as diff}
@@ -48,16 +54,21 @@
     min-height: 100vh;
     padding: 2rem;
     box-sizing: border-box;
-    background: linear-gradient(120deg, #b7e2ff 60%, #3538bb 100%);
+    background: linear-gradient(
+      120deg,
+      var(--theme-bg) 60%,
+      var(--theme-main) 100%
+    );
     h1 {
       font-family: "Montserrat", Arial, sans-serif;
       font-size: 3rem;
-      color: #1976d2;
+      color: var(--theme-main);
       margin-bottom: 0.5em;
     }
     p {
       font-size: 1.3rem;
       color: #333;
+      font-family: "Montserrat", Arial, sans-serif;
       margin-bottom: 2em;
     }
     .difficulty-buttons {
@@ -72,19 +83,19 @@
       font-size: 1.5rem;
       padding: 1rem 0;
       border-radius: 1.2rem;
-      border: none;
-      background: #f5faff;
-      color: #1976d2;
+      border: solid 2px var(--theme-main);
+      background: var(--theme-bg);
+      color: var(--theme-main);
       font-weight: 700;
-      box-shadow: 0 1px 4px #1976d220;
+      box-shadow: 0 1px 4px var(--theme-main) 20;
       cursor: pointer;
       transition:
         background 0.15s,
         color 0.15s;
       &:hover,
       &:focus {
-        background: #e3f0fc;
-        color: #0d47a1;
+        background: var(--theme-main);
+        color: #fff;
       }
     }
   }

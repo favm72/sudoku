@@ -10,6 +10,10 @@ export function setValueForActiveCells(value: number) {
   sudoku.update(() => instance)
 }
 
+export function clearSudoku() {
+  sudoku.update(() => new Sudoku())
+}
+
 export function computeCandidates() {
   const instance = get(sudoku)
   instance.computeCandidates()

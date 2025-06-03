@@ -90,6 +90,7 @@ export class Sudoku {
       })
     this.mode = SudokuMode.Normal
     this.status = SudokuStatus.Solving
+    this.errorCount = 0
     this.history = []
     this.saveHistory()
   }
@@ -285,7 +286,6 @@ export class Sudoku {
             .values()
             .every(c => c.value > 0 && !c.errorValue)
           if (completed) {
-            alert("Sudoku completado correctamente.")
             this.status = SudokuStatus.Completed
           }
         }
