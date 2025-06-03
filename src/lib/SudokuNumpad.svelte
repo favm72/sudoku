@@ -15,8 +15,16 @@
       class="numpad-btn{$sudoku.mode === SudokuMode.Annotate
         ? ' annotate-mode'
         : ''}"
-      onclick={() => setValueForActiveCells(n)}>{n}</button
+      onclick={() => setValueForActiveCells(n)}
     >
+      {#if $sudoku && $sudoku.cells && Array.from($sudoku.cells.values()).filter(cell => cell.value === n).length === 9}
+        <span class="star-badge" title="Todos los {n} están en el tablero">
+          ★
+        </span>
+      {:else}
+        {n}
+      {/if}
+    </button>
   {/each}
 
   <button class="numpad-btn delete" onclick={undoStatus} aria-label="Borrar">
@@ -153,7 +161,20 @@
     padding: 1rem;
     background: white;
   }
+  .star-badge {
+    font-size: 1.8rem;
+    color: var(--theme-main);
+    background: var(--theme-contrast);
+    border-radius: 50%;
+    padding: 0.1em 0.3em;
+    font-weight: bold;
+    box-shadow: 0 1px 4px #0002;
+    pointer-events: none;
+    z-index: 2;
+    line-height: 1;
+  }
   .numpad-btn {
+    position: relative;
     font-family: "Montserrat", Arial, sans-serif;
     font-size: 2rem;
     width: 64px;
