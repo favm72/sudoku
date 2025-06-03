@@ -108,13 +108,15 @@
     }
   }
 
-  function handleCanvasClick(event: MouseEvent) {
+  function handleCanvasPointer(event: PointerEvent) {
     const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    const x = (event.clientX - rect.left) * scaleX
+    const y = (event.clientY - rect.top) * scaleY
+    const cellSize = canvas.width / size
     const col = Math.floor(x / cellSize) + 1
     const row = Math.floor(y / cellSize) + 1
-    // Set active cell
     setActiveCell(row, col)
   }
 
@@ -158,7 +160,7 @@
       width={boardPx}
       height={boardPx}
       class="sudoku-canvas"
-      onclick={handleCanvasClick}
+      onpointerdown={handleCanvasPointer}
       tabindex="0"
       aria-label="Tablero de Sudoku"
     ></canvas>
