@@ -79,7 +79,7 @@
         } else {
           // Candidates (draw small)
           ctx.save()
-          ctx.font = `${cellSize * 0.18}px Montserrat, Arial`
+          ctx.font = `${cellSize * 0.28}px Montserrat, Arial`
           ctx.fillStyle = "#1976d2"
           for (let n = 1; n <= 9; n++) {
             const cand = cell.candidates.get(n)
@@ -179,7 +179,7 @@
   .sudoku-title {
     font-family: "Montserrat", Arial, sans-serif;
     font-size: 2.5rem;
-    color: #1976d2;
+    color: var(--theme-main);
     letter-spacing: 0.1em;
     margin: 0;
     padding-top: 0.5rem;
@@ -198,9 +198,9 @@
     width: 100%;
   }
   .sudoku-canvas {
-    background: #fff;
-    border: 2.5px solid #1976d2;
-    box-shadow: 0 2px 12px #1976d220;
+    background: var(--theme-bg);
+    border: 2.5px solid var(--theme-main);
+    box-shadow: 0 2px 12px var(--theme-main) 20;
     touch-action: manipulation;
     max-width: 98vw;
     height: auto;

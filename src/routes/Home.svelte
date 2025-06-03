@@ -1,6 +1,7 @@
 <script lang="ts">
   import { push } from "svelte-spa-router"
   import { sudokuDataset } from "../lib/dataset"
+  import ThemeSelector from "../lib/ThemeSelector.svelte"
   const difficulties = [
     { label: "Fácil", id: "Very Easy" },
     { label: "Normal", id: "Easy" },
@@ -25,6 +26,7 @@
   }
 </script>
 
+<ThemeSelector />
 <main class="home-container">
   <h1>Sudoku</h1>
   <p>Elige una dificultad para comenzar:</p>
