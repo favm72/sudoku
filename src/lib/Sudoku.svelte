@@ -1,174 +1,172 @@
 <script lang="ts">
-  import { onDestroy } from "svelte"
-  import { derived, writable } from "svelte/store"
-  import { cellKey, sudokus } from "./brain"
-  import {
-    endSolving,
-    loadSudoku,
-    newCustomSudoku,
-    setValueForActiveCells,
-    startSolving,
-    sudoku,
-  } from "./sudoku.store"
-  import SudokuCell from "./SudokuCell.svelte"
+  import { onMount } from "svelte"
+  import { get } from "svelte/store"
+  import { cellKey, SudokuStatus } from "./brain"
+  import { loadSudoku, setActiveCell, sudoku } from "./sudoku.store"
+  import SudokuNumpad from "./SudokuNumpad.svelte"
+  import SudokuTimer from "./SudokuTimer.svelte"
 
-  const rowsIndex = Array.from({ length: 9 }, (_, i) => i + 1)
-  const colsIndex = Array.from({ length: 9 }, (_, i) => i + 1)
+  const { id } = $props<{ id?: string }>()
 
-  // Timer logic
-  let timer: any = null
-  const time = writable(0)
-  let running = false
-  let finished = false
+  let running = $state(false)
+  let startedAt: Date | null = $state(null)
 
-  // Digital clock font formatting mm:ss
-  const digitalTime = derived(time, $time => {
-    const mm = String(Math.floor($time / 60)).padStart(2, "0")
-    const ss = String($time % 60).padStart(2, "0")
-    return `${mm}:${ss}`
+  let canvas: HTMLCanvasElement
+  const size = 9
+  let cellSize = 60 // px
+  let boardPx = cellSize * size
+
+  function drawBoard() {
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    ctx.clearRect(0, 0, boardPx, boardPx)
+    // Use Montserrat font for all text
+    ctx.font = `bold ${cellSize * 0.6}px Montserrat, Arial`
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle"
+    const board = get(sudoku)
+    // Draw grid
+    for (let i = 0; i <= size; i++) {
+      ctx.lineWidth = i % 3 === 0 ? 3 : 1
+      ctx.strokeStyle = i % 3 === 0 ? "#1976d2" : "#b0b0b0"
+      // Vertical
+      ctx.beginPath()
+      ctx.moveTo(i * cellSize, 0)
+      ctx.lineTo(i * cellSize, boardPx)
+      ctx.stroke()
+      // Horizontal
+      ctx.beginPath()
+      ctx.moveTo(0, i * cellSize)
+      ctx.lineTo(boardPx, i * cellSize)
+      ctx.stroke()
+    }
+    // Draw numbers and candidates
+    for (let row = 1; row <= size; row++) {
+      for (let col = 1; col <= size; col++) {
+        const cell = board.cells.get(cellKey(row, col))
+        if (!cell) continue
+        const x = (col - 1) * cellSize + cellSize / 2
+        const y = (row - 1) * cellSize + cellSize / 2
+        // Fill background if highlighted
+        if (cell.highLighted || cell.errorValue) {
+          ctx.save()
+          ctx.fillStyle = cell.errorValue ? "#ffcccc" : "#a3cff0"
+          ctx.fillRect(
+            (col - 1) * cellSize + 2,
+            (row - 1) * cellSize + 2,
+            cellSize - 4,
+            cellSize - 4
+          )
+          ctx.restore()
+        }
+        if (cell.value > 0 || cell.errorValue) {
+          ctx.font = `bold ${cellSize * 0.6}px Montserrat, Arial`
+          ctx.fillStyle = cell.isGiven
+            ? "#1976d2"
+            : cell.errorValue
+              ? "#d32f2f"
+              : "#333"
+          ctx.fillText(
+            cell.errorValue
+              ? String(cell.errorValue)
+              : cell.value
+                ? String(cell.value)
+                : "",
+            x,
+            y + 2
+          )
+        } else {
+          // Candidates (draw small)
+          ctx.save()
+          ctx.font = `${cellSize * 0.18}px Montserrat, Arial`
+          ctx.fillStyle = "#1976d2"
+          for (let n = 1; n <= 9; n++) {
+            const cand = cell.candidates.get(n)
+            if (cand && !cand.isHidden) {
+              const cx = x + (((n - 1) % 3) - 1) * cellSize * 0.32
+              const cy = y + (Math.floor((n - 1) / 3) - 1) * cellSize * 0.32
+              ctx.fillText(String(n), cx, cy + 2)
+            }
+          }
+          ctx.restore()
+        }
+        // Highlight active
+        if (cell.active) {
+          ctx.save()
+          ctx.strokeStyle = "#1976d2"
+          ctx.lineWidth = 3
+          ctx.strokeRect(
+            (col - 1) * cellSize + 2,
+            (row - 1) * cellSize + 2,
+            cellSize - 4,
+            cellSize - 4
+          )
+          ctx.restore()
+        }
+      }
+    }
+  }
+
+  function handleCanvasClick(event: MouseEvent) {
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    const col = Math.floor(x / cellSize) + 1
+    const row = Math.floor(y / cellSize) + 1
+    // Set active cell
+    setActiveCell(row, col)
+  }
+
+  onMount(() => {
+    const unsubscribe = sudoku.subscribe(() => {
+      drawBoard()
+
+      if (get(sudoku).status === SudokuStatus.Completed) {
+        alert("¡Sudoku completado!")
+        running = false
+        startedAt = new Date()
+      }
+
+      if (get(sudoku).status === SudokuStatus.Failed) {
+        alert("¡Sudoku fallido! Intenta de nuevo.")
+        running = false
+        startedAt = null
+      }
+    })
+
+    if (id) {
+      loadSudoku(id)
+      running = true
+      startedAt = new Date()
+    }
+
+    // Initial draw
+    drawBoard()
+    return unsubscribe
   })
-
-  function startGame() {
-    startSolving()
-    finished = false
-    running = true
-    time.set(0)
-    if (timer) clearInterval(timer)
-    timer = setInterval(() => {
-      time.update(t => t + 1)
-    }, 1000)
-  }
-
-  function finishGame() {
-    running = false
-    finished = true
-    if (timer) clearInterval(timer)
-    timer = null
-    endSolving()
-  }
-
-  function newExpertSudoku() {
-    loadSudoku(sudokus[0])
-  }
-
-  onDestroy(() => {
-    if (timer) clearInterval(timer)
-  })
-
-  let showCandidates = false
-
-  function handleNumberInput(num: number) {
-    // Llama a la función para poner el valor en las celdas activas
-    setValueForActiveCells(num)
-  }
-  function handleDeleteInput() {
-    setValueForActiveCells(0)
-  }
 </script>
 
 <section class="sudoku-container">
   <div class="sudoku-header">
     <h1 class="sudoku-title">Milena</h1>
-    <span class="timer digital-font">
-      <svg class="clock-icon" viewBox="0 0 24 24" width="24" height="24"
-        ><circle
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="#1976d2"
-          stroke-width="2"
-          fill="none"
-        /><line
-          x1="12"
-          y1="12"
-          x2="12"
-          y2="7"
-          stroke="#1976d2"
-          stroke-width="2"
-          stroke-linecap="round"
-        /><line
-          x1="12"
-          y1="12"
-          x2="16"
-          y2="12"
-          stroke="#1976d2"
-          stroke-width="2"
-          stroke-linecap="round"
-        /></svg
-      >
-      {$digitalTime}
-    </span>
+    <SudokuTimer {running} startTime={startedAt} />
   </div>
-  <section class="sudoku-controls">
-    <button class="start-btn" on:click={newCustomSudoku} disabled={running}
-      >Nuevo Custom</button
-    >
-    <button class="start-btn" on:click={newExpertSudoku} disabled={running}
-      >Nuevo Experto</button
-    >
-    <button
-      class="candidates-btn"
-      on:click={() => (showCandidates = !showCandidates)}
-    >
-      {showCandidates ? "Ocultar candidatos" : "Mostrar candidatos"}
-    </button>
-    <button class="start-btn" on:click={startGame} disabled={running}
-      >Comenzar</button
-    >
-    <button class="finish-btn" on:click={finishGame} disabled={!running}
-      >Finalizar</button
-    >
-    {#if finished}
-      <span class="finished">Juego finalizado</span>
-    {/if}
-  </section>
   <section class="sudoku-board">
-    {#each rowsIndex as row}
-      {#each colsIndex as col}
-        {#if $sudoku.cells.has(cellKey(row, col))}
-          <SudokuCell
-            cell={$sudoku.cells.get(cellKey(row, col))!}
-            {showCandidates}
-          />
-        {:else}
-          <div class="cell">Empty</div>
-        {/if}
-      {/each}
-    {/each}
+    <canvas
+      bind:this={canvas}
+      width={boardPx}
+      height={boardPx}
+      class="sudoku-canvas"
+      onclick={handleCanvasClick}
+      tabindex="0"
+      aria-label="Tablero de Sudoku"
+    ></canvas>
   </section>
-
-  <section class="sudoku-numpad">
-    <div class="numpad-row">
-      {#each [1, 2, 3] as n}
-        <button class="numpad-btn" on:click={() => handleNumberInput(n)}
-          >{n}</button
-        >
-      {/each}
-    </div>
-    <div class="numpad-row">
-      {#each [4, 5, 6] as n}
-        <button class="numpad-btn" on:click={() => handleNumberInput(n)}
-          >{n}</button
-        >
-      {/each}
-    </div>
-    <div class="numpad-row">
-      {#each [7, 8, 9] as n}
-        <button class="numpad-btn" on:click={() => handleNumberInput(n)}
-          >{n}</button
-        >
-      {/each}
-    </div>
-    <div class="numpad-row">
-      <button class="numpad-btn delete" on:click={handleDeleteInput}
-        >Borrar</button
-      >
-    </div>
-  </section>
+  <SudokuNumpad />
 </section>
 
 <style lang="scss">
-  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
   .sudoku-header {
     display: flex;
     justify-content: center;
@@ -185,85 +183,6 @@
     padding-top: 0.5rem;
     text-shadow: 1px 1px 2px #eee;
   }
-  .sudoku-controls {
-    padding: 1rem;
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    min-width: 180px;
-  }
-  .timer {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.6rem;
-    color: #1976d2;
-    background: #f5faff;
-    border-radius: 1.5rem;
-    padding: 0.3rem 1.1rem 0.3rem 0.7rem;
-    box-shadow: 0 1px 4px #1976d220;
-  }
-  .digital-font {
-    font-family: "Share Tech Mono", "Courier New", Courier, monospace;
-    letter-spacing: 0.08em;
-  }
-  .clock-icon {
-    margin-right: 0.5rem;
-    vertical-align: middle;
-  }
-  .sudoku-controls .start-btn,
-  .sudoku-controls .finish-btn {
-    font-size: 1rem;
-    padding: 0.5rem 1.2rem;
-    border: none;
-    border-radius: 1.2rem;
-    background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background 0.2s,
-      box-shadow 0.2s;
-    box-shadow: 0 2px 8px #1976d220;
-    margin-bottom: 0.2rem;
-  }
-  .sudoku-controls .finish-btn {
-    background: linear-gradient(90deg, #d32f2f 60%, #f44336 100%);
-    margin-bottom: 0;
-  }
-  .sudoku-controls .start-btn:disabled,
-  .sudoku-controls .finish-btn:disabled {
-    background: #bdbdbd;
-    color: #eee;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  .sudoku-controls .finished {
-    color: #1976d2;
-    font-weight: bold;
-    margin-top: 0.5rem;
-    font-size: 1.1rem;
-    letter-spacing: 0.04em;
-  }
-  .sudoku-controls .candidates-btn {
-    font-size: 1rem;
-    padding: 0.5rem 1.2rem;
-    border: none;
-    border-radius: 1.2rem;
-    background: linear-gradient(90deg, #43a047 60%, #81c784 100%);
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition:
-      background 0.2s,
-      box-shadow 0.2s;
-    box-shadow: 0 2px 8px #1976d220;
-    margin-bottom: 0.2rem;
-  }
-  .sudoku-controls .candidates-btn:active {
-    background: #388e3c;
-  }
   .sudoku-container {
     display: flex;
     flex-direction: column;
@@ -273,48 +192,17 @@
   }
   .sudoku-board {
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
-    gap: 1px;
-    border: 1px solid black;
-    background: #222;
+    place-items: center;
+    width: 100%;
   }
-  .sudoku-numpad {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 2rem;
-    gap: 0.3rem;
-  }
-  .numpad-row {
-    display: flex;
-    gap: 0.5rem;
-  }
-  .numpad-btn {
-    font-family: "Montserrat", Arial, sans-serif;
-    font-size: 2rem;
-    width: 64px;
-    height: 64px;
-    border-radius: 1.2rem;
-    border: none;
-    background: #f5faff;
-    color: #1976d2;
-    font-weight: 700;
-    box-shadow: 0 1px 4px #1976d220;
-    cursor: pointer;
-    transition:
-      background 0.15s,
-      color 0.15s;
-  }
-  .numpad-btn:active {
-    background: #e3f0fc;
-  }
-  .numpad-btn.delete {
-    background: linear-gradient(90deg, #d32f2f 60%, #f44336 100%);
-    color: #fff;
-    font-size: 1.3rem;
-    width: 140px;
-    height: 48px;
-    margin-top: 0.2rem;
+  .sudoku-canvas {
+    background: #fff;
+    border: 2.5px solid #1976d2;
+    box-shadow: 0 2px 12px #1976d220;
+    touch-action: manipulation;
+    max-width: 98vw;
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
 </style>

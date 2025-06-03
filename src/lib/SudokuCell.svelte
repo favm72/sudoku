@@ -65,8 +65,6 @@
 {/if}
 
 <style lang="scss">
-  @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
-
   .cell {
     font-family: "Montserrat", Arial, sans-serif;
     display: flex;

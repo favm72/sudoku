@@ -1,8 +1,6 @@
 <script lang="ts">
-  import Sudoku from "./lib/Sudoku.svelte"
+  import Router from "svelte-spa-router"
+  import routes from "./routes"
 </script>
 
-<Sudoku />
-
-<style>
-</style>
+<Router {routes} />
